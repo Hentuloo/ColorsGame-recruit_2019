@@ -1,11 +1,16 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import gameConfig from 'config/gameConfig';
 
 const Wrapper = styled.div`
   position: relative;
   background-color: ${({ color }) => color};
+  ${({ kill }) =>
+    kill &&
+    css`
+      background-color: ${({ theme }) => theme.color.white};
+    `}
   cursor: pointer;
   &::after {
     content: '';
@@ -27,11 +32,17 @@ const Wrapper = styled.div`
   }
 `;
 
-const Field = ({ index, onClick, colorId }) => {
+const Field = ({ index, onClick, colorId, kill }) => {
   const { color } = gameConfig.colors.find(({ id }) => id === colorId);
 
   return (
-    <Wrapper onClick={onClick} color={color} role="button" tabIndex="0">
+    <Wrapper
+      kill={kill}
+      onClick={onClick}
+      color={color}
+      role="button"
+      tabIndex="0"
+    >
       {index}
     </Wrapper>
   );

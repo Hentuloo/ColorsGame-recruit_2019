@@ -1,6 +1,7 @@
 const gameConfig = {
   fieldsWidth: 14,
   fieldsHeight: 10,
+  points: 3,
   colors: [
     { id: 1, color: 'rgb(30, 144, 255)' },
     { id: 2, color: 'rgb(255, 99, 71)' },

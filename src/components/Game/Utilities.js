@@ -9,18 +9,29 @@ export const randomColor = () => {
 
 export const createAllFields = () => {
   const { fieldsWidth, fieldsHeight } = gameConfig;
+  const amountOfFields = fieldsWidth * fieldsHeight - 1;
+
   const fields = [];
-  for (let xDirection = 1; xDirection <= fieldsWidth; xDirection++) {
-    for (let yDirection = 1; yDirection <= fieldsHeight; yDirection++) {
-      const uniqueIndex = xDirection * 10 + yDirection - 10;
-      const colorId = randomColor();
-      fields.push({
-        id: uniqueIndex,
-        x: xDirection,
-        y: yDirection,
-        colorId,
-      });
-    }
+  for (let i = 0; i <= amountOfFields; i++) {
+    const colorId = randomColor();
+    fields.push({
+      id: i,
+      colorId,
+      kill: false, // change color with next round
+    });
   }
   return fields;
+};
+
+export const compareColorsOfFields = (currentField, nextField) => {
+  const { fieldsWidth, fieldsHeight } = gameConfig;
+  const amountOfFields = fieldsWidth * fieldsHeight - 1;
+  if (currentField.id <= 0 || currentField.id >= amountOfFields) {
+    return false;
+  }
+  if (currentField.colorId !== nextField.colorId || nextField.kill === true) {
+    return false;
+  }
+
+  return true;
 };
