@@ -35,3 +35,21 @@ export const compareColorsOfFields = (currentField, nextField) => {
 
   return true;
 };
+
+export const stateWithKilledField = (id, fieldsState) => {
+  const newFieldState = fieldsState;
+  newFieldState[id].kill = true;
+  return newFieldState;
+};
+export const refreshFieldsState = fieldsState => {
+  return fieldsState.map(field => {
+    if (field.kill === true) {
+      return {
+        ...field,
+        colorId: randomColorId(),
+        kill: false,
+      };
+    }
+    return field;
+  });
+};

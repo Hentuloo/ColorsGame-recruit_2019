@@ -5,7 +5,8 @@ import gameConfig from 'config/gameConfig';
 import {
   createAllFields,
   compareColorsOfFields,
-  randomColorId,
+  stateWithKilledField,
+  refreshFieldsState,
 } from './Utilities';
 import Field from './Field';
 
@@ -33,29 +34,19 @@ const Chessboard = ({ className, addToGameScore }) => {
   const [clicEventFlag, setClickEventFlag] = useState(true);
 
   const killField = id => {
-    const newFieldState = fieldsState;
-    newFieldState[id].kill = true;
-    setFieldsState([...newFieldState]);
+    const newState = stateWithKilledField(id, fieldsState);
+    setFieldsState(newState);
     setKilledFields(killedFields.push(id));
   };
   const refreshKilledFields = () => {
-    const newFieldState = fieldsState.map(field => {
-      if (field.kill === true) {
-        return {
-          ...field,
-          colorId: randomColorId(),
-          kill: false,
-        };
-      }
-      return field;
-    });
-    setFieldsState(newFieldState);
+    const newState = refreshFieldsState(fieldsState);
+    setFieldsState(newState);
   };
 
   const checkTwoFields = (id, direction) => {
+    const firstField = fieldsState[id];
     switch (direction) {
       case 'FROM_LEFT': {
-        const firstField = fieldsState[id];
         const secondField = fieldsState[id - 1];
         if (secondField && compareColorsOfFields(firstField, secondField)) {
           // The colors are the same
@@ -67,7 +58,6 @@ const Chessboard = ({ className, addToGameScore }) => {
         return false;
       }
       case 'FROM_RIGHT': {
-        const firstField = fieldsState[id];
         const secondField = fieldsState[id + 1];
         if (secondField && compareColorsOfFields(firstField, secondField)) {
           killField(secondField.id);
@@ -77,7 +67,6 @@ const Chessboard = ({ className, addToGameScore }) => {
         return false;
       }
       case 'FROM_TOP': {
-        const firstField = fieldsState[id];
         const secondField = fieldsState[id - fieldsWidth];
         if (secondField && compareColorsOfFields(firstField, secondField)) {
           killField(secondField.id);
@@ -87,7 +76,6 @@ const Chessboard = ({ className, addToGameScore }) => {
         return false;
       }
       case 'FROM_BOTTOM': {
-        const firstField = fieldsState[id];
         const secondField = fieldsState[id + fieldsWidth];
         if (secondField && compareColorsOfFields(firstField, secondField)) {
           killField(secondField.id);
