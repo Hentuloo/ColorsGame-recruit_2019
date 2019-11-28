@@ -32,7 +32,7 @@ const Wrapper = styled.div`
   }
 `;
 
-const Field = ({ index, onClick, colorId, kill }) => {
+const Field = ({ onClick, colorId, kill }) => {
   const { color } = gameConfig.colors.find(({ id }) => id === colorId);
 
   return (
@@ -43,7 +43,7 @@ const Field = ({ index, onClick, colorId, kill }) => {
       role="button"
       tabIndex="0"
     >
-      {index}
+      {/* {index} */}
     </Wrapper>
   );
 };

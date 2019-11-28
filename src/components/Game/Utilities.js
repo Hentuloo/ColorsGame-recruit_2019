@@ -1,6 +1,6 @@
 import gameConfig from 'config/gameConfig';
 
-export const randomColor = () => {
+export const randomColorId = () => {
   const avaiableColors = gameConfig.colors;
   const randomObject = Math.floor(Math.random() * avaiableColors.length);
   const { id } = avaiableColors[randomObject];
@@ -13,7 +13,7 @@ export const createAllFields = () => {
 
   const fields = [];
   for (let i = 0; i <= amountOfFields; i++) {
-    const colorId = randomColor();
+    const colorId = randomColorId();
     fields.push({
       id: i,
       colorId,

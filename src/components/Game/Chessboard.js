@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import gameConfig from 'config/gameConfig';
-import { createAllFields, compareColorsOfFields } from './Utilities';
+import {
+  createAllFields,
+  compareColorsOfFields,
+  randomColorId,
+} from './Utilities';
 import Field from './Field';
 
 const Wrapper = styled.div`
@@ -16,7 +20,7 @@ const Wrapper = styled.div`
 `;
 
 const Chessboard = ({ className, addToGameScore }) => {
-  const { fieldsWidth, poinstForfield } = gameConfig;
+  const { fieldsWidth, poinstForfield, pointsForBadMove } = gameConfig;
 
   const [fieldsState, setFieldsState] = useState([
     //   {
@@ -34,45 +38,18 @@ const Chessboard = ({ className, addToGameScore }) => {
     setFieldsState([...newFieldState]);
     setKilledFields(killedFields.push(id));
   };
-  const collapseField = id => {
-    const newState = fieldsState;
-
-    let startField = id;
-    let upperFieldId = id - fieldsWidth;
-    // if field is on in first row
-    if (upperFieldId <= 0) {
-      newState[startField].kill = true;
-      setFieldsState(newState);
-      return;
-    }
-
-    do {
-      // change color from upper field
-      const upperField = fieldsState[upperFieldId];
-      const { colorId, kill } = upperField;
-
-      // if upperField is not killed
-      if (kill === false) {
-        // change (startField) lower field
-        newState[startField].colorId = colorId;
-        newState[startField].kill = false;
-        newState[upperFieldId].kill = true;
-        startField -= fieldsWidth;
+  const refreshKilledFields = () => {
+    const newFieldState = fieldsState.map(field => {
+      if (field.kill === true) {
+        return {
+          ...field,
+          colorId: randomColorId(),
+          kill: false,
+        };
       }
-      // go to next upper field and check limit
-      upperFieldId -= fieldsWidth;
-    } while (upperFieldId >= 0);
-
-    setFieldsState(newState);
-  };
-
-  const newRound = () => {
-    // count points and return to parent component(Game)
-    addToGameScore(killedFields.length - 1 * poinstForfield);
-    // Collapse killed fields
-    killedFields.forEach(fieldId => collapseField(fieldId));
-    // reset killed fields array
-    setKilledFields([]);
+      return field;
+    });
+    setFieldsState(newFieldState);
   };
 
   const checkTwoFields = (id, direction) => {
@@ -131,6 +108,53 @@ const Chessboard = ({ className, addToGameScore }) => {
     checkTwoFields(id, 'FROM_BOTTOM');
   };
 
+  const collapseField = id => {
+    const newState = fieldsState;
+
+    let startField = id;
+    let upperFieldId = id - fieldsWidth;
+    // if field is on in first row
+    if (upperFieldId <= 0) {
+      newState[startField].kill = true;
+      setFieldsState(newState);
+      return;
+    }
+
+    do {
+      // change color from upper field
+      const upperField = fieldsState[upperFieldId];
+      const { colorId, kill } = upperField;
+
+      // if upperField is not killed
+      if (kill === false) {
+        // change (startField) lower field
+        newState[startField].colorId = colorId;
+        newState[startField].kill = false;
+        newState[upperFieldId].kill = true;
+        startField -= fieldsWidth;
+      }
+      // go to next upper field and check limit
+      upperFieldId -= fieldsWidth;
+    } while (upperFieldId >= 0);
+
+    setFieldsState(newState);
+  };
+
+  const newRound = () => {
+    // count points and return to parent component(Game)
+    addToGameScore(
+      killedFields.length === 0
+        ? pointsForBadMove
+        : killedFields.length - 1 * poinstForfield,
+    );
+    // Collapse killed fields
+    killedFields.forEach(fieldId => collapseField(fieldId));
+    // reset killed fields array
+    setKilledFields([]);
+    // create new random fields
+    refreshKilledFields();
+  };
+
   const handleFieldClick = index => {
     if (clicEventFlag) {
       setClickEventFlag(true);
@@ -147,6 +171,7 @@ const Chessboard = ({ className, addToGameScore }) => {
       setFieldsState(createAllFields());
     }
   });
+
   return (
     <Wrapper className={className} columnsCount={fieldsWidth}>
       {fieldsState.map(({ id, colorId, kill }, index) => (
