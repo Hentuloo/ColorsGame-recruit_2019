@@ -4,9 +4,10 @@ import styled from 'styled-components';
 import gameConfig from 'config/gameConfig';
 import {
   createAllFields,
-  compareColorsOfFields,
   stateWithKilledField,
   refreshFieldsState,
+  collapseFieldsByKilledFlag,
+  compareTwoFieldsByColor,
 } from './Utilities';
 import Field from './Field';
 
@@ -34,59 +35,27 @@ const Chessboard = ({ className, addToGameScore }) => {
   const [clicEventFlag, setClickEventFlag] = useState(true);
 
   const killField = id => {
+    // change kill flag in field
     const newState = stateWithKilledField(id, fieldsState);
     setFieldsState(newState);
     setKilledFields(killedFields.push(id));
   };
+
   const refreshKilledFields = () => {
+    // refrest color where field have kill:true
     const newState = refreshFieldsState(fieldsState);
     setFieldsState(newState);
   };
 
   const checkTwoFields = (id, direction) => {
-    const firstField = fieldsState[id];
-    switch (direction) {
-      case 'FROM_LEFT': {
-        const secondField = fieldsState[id - 1];
-        if (secondField && compareColorsOfFields(firstField, secondField)) {
-          // The colors are the same
-          killField(secondField.id);
-          findFieldAround(secondField.id);
-          return true;
-        }
-        // the Colors are't the same
-        return false;
+    // check if field in [direction] exist and have the same color then return callback with id or null
+    compareTwoFieldsByColor(id, fieldsState, direction, upperFieldId => {
+      if (upperFieldId) {
+        // kill this field and find next
+        killField(upperFieldId);
+        findFieldAround(upperFieldId);
       }
-      case 'FROM_RIGHT': {
-        const secondField = fieldsState[id + 1];
-        if (secondField && compareColorsOfFields(firstField, secondField)) {
-          killField(secondField.id);
-          findFieldAround(secondField.id);
-          return true;
-        }
-        return false;
-      }
-      case 'FROM_TOP': {
-        const secondField = fieldsState[id - fieldsWidth];
-        if (secondField && compareColorsOfFields(firstField, secondField)) {
-          killField(secondField.id);
-          findFieldAround(secondField.id);
-          return true;
-        }
-        return false;
-      }
-      case 'FROM_BOTTOM': {
-        const secondField = fieldsState[id + fieldsWidth];
-        if (secondField && compareColorsOfFields(firstField, secondField)) {
-          killField(secondField.id);
-          findFieldAround(secondField.id);
-          return true;
-        }
-        return false;
-      }
-      default:
-        return null;
-    }
+    });
   };
 
   const findFieldAround = id => {
@@ -97,34 +66,7 @@ const Chessboard = ({ className, addToGameScore }) => {
   };
 
   const collapseField = id => {
-    const newState = fieldsState;
-
-    let startField = id;
-    let upperFieldId = id - fieldsWidth;
-    // if field is on in first row
-    if (upperFieldId <= 0) {
-      newState[startField].kill = true;
-      setFieldsState(newState);
-      return;
-    }
-
-    do {
-      // change color from upper field
-      const upperField = fieldsState[upperFieldId];
-      const { colorId, kill } = upperField;
-
-      // if upperField is not killed
-      if (kill === false) {
-        // change (startField) lower field
-        newState[startField].colorId = colorId;
-        newState[startField].kill = false;
-        newState[upperFieldId].kill = true;
-        startField -= fieldsWidth;
-      }
-      // go to next upper field and check limit
-      upperFieldId -= fieldsWidth;
-    } while (upperFieldId >= 0);
-
+    const newState = collapseFieldsByKilledFlag(id, fieldsState);
     setFieldsState(newState);
   };
 
@@ -141,15 +83,16 @@ const Chessboard = ({ className, addToGameScore }) => {
     setKilledFields([]);
     // create new random fields
     refreshKilledFields();
+
+    setClickEventFlag(true);
   };
 
   const handleFieldClick = index => {
     if (clicEventFlag) {
-      setClickEventFlag(true);
+      setClickEventFlag(false);
       const clickedField = fieldsState[index];
       const { id, colorId } = clickedField;
       findFieldAround(id, colorId);
-
       newRound();
     }
   };
