@@ -8,14 +8,15 @@ import Field from './Field';
 const Wrapper = styled.div`
   display: grid;
   grid-template-columns: repeat(${({ columnsCount }) => columnsCount}, 1fr);
-  text-align: center;
   width: 98%;
   max-width: 700px;
+  max-height: 650px;
   margin: 15px auto;
+  text-align: center;
 `;
 
-const Chessboard = ({ className }) => {
-  const { fieldsWidth } = gameConfig;
+const Chessboard = ({ className, addToGameScore }) => {
+  const { fieldsWidth, poinstForfield } = gameConfig;
 
   const [fieldsState, setFieldsState] = useState([
     //   {
@@ -38,9 +39,8 @@ const Chessboard = ({ className }) => {
 
     let startField = id;
     let upperFieldId = id - fieldsWidth;
-
     // if field is on in first row
-    if (upperFieldId < 0) {
+    if (upperFieldId <= 0) {
       newState[startField].kill = true;
       setFieldsState(newState);
       return;
@@ -61,14 +61,14 @@ const Chessboard = ({ className }) => {
       }
       // go to next upper field and check limit
       upperFieldId -= fieldsWidth;
-    } while (upperFieldId > 0);
+    } while (upperFieldId >= 0);
 
     setFieldsState(newState);
   };
 
   const newRound = () => {
     // count points and return to parent component(Game)
-    console.log(`${killedFields.length}points`);
+    addToGameScore(killedFields.length - 1 * poinstForfield);
     // Collapse killed fields
     killedFields.forEach(fieldId => collapseField(fieldId));
     // reset killed fields array

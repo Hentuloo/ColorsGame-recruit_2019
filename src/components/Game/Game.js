@@ -1,26 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import Chessboard from './Chessboard';
 import Dashboard from './Dashboard';
 
 const StyledChessboard = styled(Chessboard)`
-  flex-grow: 1;
+  flex-basis: 100%;
 `;
 const StyledDashboard = styled(Dashboard)`
   height: 60px;
 `;
 const Wrapper = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-rows: 1fr auto;
   width: 100%;
-  flex-direction: column;
 `;
 
 const Game = ({ className }) => {
+  const [gameScore, setGameScore] = useState(0);
+
+  const addToGameScore = points => {
+    setGameScore(gameScore + points);
+  };
+  const resetGameScore = () => setGameScore(0);
+
   return (
     <Wrapper className={className}>
-      <StyledChessboard />
-      <StyledDashboard />
+      <StyledChessboard addToGameScore={addToGameScore} />
+      <StyledDashboard resetGameScore={resetGameScore} gameScore={gameScore} />
     </Wrapper>
   );
 };

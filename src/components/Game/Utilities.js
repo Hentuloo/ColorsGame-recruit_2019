@@ -26,7 +26,7 @@ export const createAllFields = () => {
 export const compareColorsOfFields = (currentField, nextField) => {
   const { fieldsWidth, fieldsHeight } = gameConfig;
   const amountOfFields = fieldsWidth * fieldsHeight - 1;
-  if (currentField.id <= 0 || currentField.id >= amountOfFields) {
+  if (currentField.id < 0 || currentField.id > amountOfFields) {
     return false;
   }
   if (currentField.colorId !== nextField.colorId || nextField.kill === true) {
